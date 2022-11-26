@@ -1,0 +1,200 @@
+variables:
+  - template: ../0000-DEV-CommonVariables.yml
+  
+resources:
+  repositories:
+  - repository: SecuritiesPricingValuationV2
+    type: git
+    name: SecuritiesPricingValuationV2
+    ref: refs/tags/$(a.SPV_TAG)
+  - repository: SecuritiesPricingValuationUI
+    type: git
+    name: SecuritiesPricingValuationUI
+    ref: refs/tags/$(a.SPV_TAG)
+
+pool:
+  name: 'SelfHosted_SAM_CTP_DEV'
+
+parameters:
+  - name: releaseSPVAPI
+    type: boolean
+    displayName: Build/Release SPV API
+    default: false
+  - name: releaseSPVUI
+    type: boolean
+    displayName: Build/Release SPV UI
+    default: false
+  - name: isManagedIdentityEnabledDatabase
+    type: boolean
+    displayName: Enable MSI Database
+    default: false
+  - name: isManagedIdentityEnabledKeyVault
+    type: boolean
+    displayName: Enable MSI Key Vault
+    default: false
+  - name: isManagedIdentityEnabledStorage
+    type: boolean
+    displayName: Enable MSI Storage Account
+    default: false
+  - name: enableConectionStrings
+    type: boolean
+    displayName: Enable Configuration SPV
+    default: false
+  - name: addCheckMarxReport
+    type: boolean
+    displayName: Add Checkmarx Report
+    default: false
+
+stages:
+  - template: ../../TemplatesV2/2400SPVBlock/2400 SPV Block - Build.yml
+    parameters:
+      # Constances
+      ansibleCredentials: '395' # 507 - 395
+      ansibleTowerConnection: 'Ansible Smart Automation SPN'
+      appServicePlanId: '/subscriptions/a566acec-38fe-47c8-9129-d8d2a796be02/resourceGroups/UE2USAMHUBRSG01/providers/Microsoft.Web/serverFarms/UE2U3SAMAPPASP02'
+      appServicePlanName: 'UE2D1SAMAPPASP02' # appServicePlanNameWeb
+      azureRmClientID: 'ca00a132-21fb-4d41-99ff-5bd69269d41c'
+      azureRmSecret: '$(AZURE_SECRET)'
+      azureRmTenantID: '5b973f99-77df-4beb-b27d-aa0c70b8482c'
+      azureSubscription: 'CTP_ARM_NonProd2'
+      chargeCode: '41669727'
+      ctpService: 'Co-Dev'
+      deploymentId: 'SAMDEV'
+      enableKeyVaultIntegration: $True
+      environment: 'Development'
+      environmentInstance: 'd1' # ReleaseEnvironment EnvironmentInstance
+      framework: 'dotnetcore'
+      hubKeyVaultName: 'UE2DSAMGBLPRO01' # keyVaultName
+      hubResourceGroup: 'UE2DSAMHUBRSG01' # aspResourceGroupName appInsightsResourceGroupName keyVaultRGName
+      ipamOrganization: 'CoDev'
+      keyvaultResourceId: '/subscriptions/1666cc8c-eec4-4c17-a591-d642becdc248/resourceGroups/UE2DSAMHUBRSG01/providers/Microsoft.KeyVault/vaults/UE2DSAMGBLPRO01'
+      location: 'eastus2'
+      omsResourceGroup: 'USEPOMSOMSRSG18'
+      omsWorkspaceName: 'USEPOMSOMSOMS18'
+      owner: 'gulam.dasthagir@ey.com'
+      productApp: 'Smart Automation'
+      resourceGroupName: 'UE2D1SAMSPVRSG01'
+      subscriptionId: '1666cc8c-eec4-4c17-a591-d642becdc248'
+      towerEnvironment: 'Production'
+      towerPassword: '$(TOWER_PASSWORD)'
+      towerUser: 'P.Tower_SmartAuto.01'
+      # MSI SPV
+      isManagedIdentityEnabledDatabase: ${{ parameters.isManagedIdentityEnabledDatabase }}
+      isManagedIdentityEnabledKeyVault: ${{ parameters.isManagedIdentityEnabledKeyVault }}
+      isManagedIdentityEnabledStorage: ${{ parameters.isManagedIdentityEnabledStorage }}
+      # Sql Server
+      sqlResourceGroupName: 'UE2D2SAMSQLRSG01'
+      sqlServerName: 'ue2d2samsqlsvr01'
+      sqlServerPassword: '$(SQL_PASS)' # dbPassword
+      sqlServerUserName: 'dbWSS' # dbUser
+      # SPV Infra
+      spvCertificateName: 'spv-d1-eu2-ey-net' # smlCertificateName
+      spvEnableSSLBinding: false # smlEnableSNIBinding
+      SPVFullPublicName: 'spv-d1-eu2.ey.net' # smlFullPublicName allowedOrigin1 oauthRealm
+      SPVWebAppName: 'ue2d1samspvwap10' # smlWebAppName
+      # SPV Database Config
+      collation: 'SQL_Latin1_General_CP1_CI_AS'
+      databaseTier: 'Standard'
+      skuName: 'S2'
+      sqlBackupLongTermRetentionMonthlyMonths: '6'
+      sqlBackupLongTermRetentionWeeklyWeeks: '6'
+      sqlBackupShortTermRetentionDays: '14'
+      # SPV Virtual Path
+      spvVirtualName: 'api' # smlVirtualNameApi
+      spvVirtualPath: 'site\wwwroot\api' # smlVirtualPathApi
+      # SPV Database
+      spvDbName: 'UE2D2SAMSPVSQL10' # smlDbName
+      # SPV Build
+      callbackUrl: '/Canvas/CI/Upstream/{0}'
+      canvasEnvironment1: 'uat3' # canvasEnvironment
+      canvasEnvironment2: 'uat2'
+      canvasGroupId1: '5cf4af0c-d2bb-4806-8953-7655adcfe245' # groupId
+      canvasGroupId2: '46c9cd8d-8885-4cb0-b2e0-d3d40a201565' # groupId2
+      ccnAccountDetailsEndpoint: 'account/details/crasummary/{0}/{1}/{2}'
+      ccnAutomation: 'automation/get/{0}/{3}'
+      ccnClientId: 'f60b8426-b8d1-45d6-9501-73e7ba50ddd4'
+      ccnEngagementEndpoint: 'User/{0}/{1}'
+      ccnIsStandardResponse: 'true'
+      ccnMetaDataEndpoint: 'engagement/MetaData/{0}/{1}/{2}'
+      ccnMisstatementsEndpoint: 'engagement/misstatements/{0}/{1}/{2}'
+      ccnProfileEndpoint: 'engagement/profile/switch/{0}/{1}/{2}' # engagement/profile/{0}/{1}/{2}
+      ccnServiceUrl: 'mga-d1-eu2.ey.net/sam/ccn-d1/ccn/v3/' #'ccn-d1-eu2.ey.net/api/v3/' # ccnUrl
+      ccnWorkspaceEndpoint: 'workspace/engagement/{0}/{2}'
+      cgfClientId: '9c0756fa-7829-4e0d-8c79-73a60187829e' # ConfigAPIClientId
+      cgfConfigApiUrl: 'https://sa-config-d1-eu2.ey.net/Config/Generate/' # ConfigAPIUrl
+      configPath: '../src/config/ctpd1.json'
+      dataDurationInterval: '00:02:00:00'
+      dbConnectionString: 'SPVDB' # DBConnectionStringName SamplingDBv2 (erase this one)
+      disabledSAPolicy: false
+      disableSAPolicy: 'false'
+      enabledSwagger: true
+      instance: 'https://login.windows.net' # Instance
+      redisName: 'UE2DSAMRDSSGR01'
+      sahClientId: 'dcabf511-e6bb-400b-a8b6-0f2f6eb576c7' # canvasResource
+      sahFullPublicName: 'mga-d1-eu2.ey.net/sam/sah-d1/sah' #'sah-d1-eu2.ey.net' # allowedOrigin2
+      sasClientId: 'ea9227e6-f5b3-4494-aa51-ede8ac3fb622' # SasAppId
+      sasCreateEndpoint: '{0}/{1}/files'
+      sasDeleteEnpoint: '{0}/{1}/files/{2}'
+      sasDetailsEndpoint: '{0}/{1}/files/{2}/details'
+      sasEnabled: 'false'
+      sasModifyEnpoint: '{0}/{1}/files/{2}'
+      sasReadEnpoint: '{0}/{1}/files/{2}?offset={3}&length={4}'
+      sasServiceUrl: 'mga-d1-eu2.ey.net/sam/sas-d1/sas/v1/{0}'
+      securityAppName: 'Securities Pricing Valuation'
+      sendGridApiKey: '$(SENDGRID_KEY)'
+      smtpEmail: 'usn-sampling@ey.com'
+      signalREnvironment: 'D1' # signalREnv
+      signalRHostType: 'AzureSignalR'
+      signalRName: 'UE2D1SAMSAISGR01'
+      resourceGroupSignalR: 'UE2D1SAMDCLRSG01' # signalrRSGName
+      resourceGroupRedis: 'UE2DSAMHUBRSG01' # redisRSGName
+      spvApiUrl: '/api' # UIapiroot
+      spvuiClientId: 'aca27618-0efd-415f-b3e3-7381e2e0c67f' #NONMSAL '391a35a6-be93-4689-90aa-17a92dc33897'
+      spvuiClientSecret: '$(SPVUI_SECRET)' # appSecret ClientSecret
+      spvEnvironment: 'd1' # UIenvironment
+      spvShowVersion: 'false' # UIshowVersion
+      useConfigApi: 'false'
+      version: '1' # MajorVersion MinorVersion
+      # SPV Build Version
+      SPVConfigurationBuild: 'Debug'
+      SPVNetCoreVersion: '6.0.101'
+      SPVNodeVersion: '16.x'
+      SPVNugetVersion: '4.5.0'
+      # SPV Paans
+      paansApiUrl: '/api/v1/policy/check'
+      paansClientId: 'A3FFC94F-8E43-4B25-8E38-5FC2C7CF6BAE' # paansId
+      paansClientSecret: '$(PAANS_SECRET)' # paansSecret this needs to be an env variable
+      paansFullPublicName: 'uat.paans.sbp.eyclienthub.com'
+      paansIsRequired: 'true'
+      paansRegion: 'Global'
+      paansRejectUrl: 'public/no-policy/{0}'
+      paansReviewUrl: '/viewnotice?a={0}&pt={1}&r={2}&l={3}'
+      paansUrl: '{0}'
+      # SPV Configuration
+      appInsightsName: 'UE2D1SAMAPPINS01'
+      azureKeyVaultUri: 'https://ue2dsamgblpro01.vault.azure.net/'
+      certificatePassword: '$(CERT_PASS)'
+      defaultDocuments: 'index.html'
+      spvAppRemovalList: 'ClientSecret'
+      # App Gateway
+      appGatewayName: 'UE2DSAMAPPAAG01'
+      aseIpAddress: '10.26.205.43'
+      cookieBasedAffinity: 'Enabled'
+      identityName: 'UE2DSAMGBLPRO01-MSI'
+      probePath: '/'
+      spvAppGateCertName: 'spv-d1-eu2-ey-net'
+      type: 'EXT'
+      # CheckmarxScan
+      addCheckMarxReport: ${{ parameters.addCheckMarxReport }}
+      # Infrastructure Creation
+      enableCreateResourceGroupSPV: false
+      enableAppServiceCreationSPVUI: false
+      enableAppServiceCreationSPVAPI: false
+      enableSQLDatabaseCreationSPV: false
+      enableCreateVirtualPathSPV: false
+      # Release SPV
+      releaseSPVAPI: ${{ parameters.releaseSPVAPI }}
+      releaseSPVUI: ${{ parameters.releaseSPVUI }}
+      # Configutation
+      enableConectionStrings: ${{ parameters.enableConectionStrings }}
+      enableConfigurationAppGate: false
