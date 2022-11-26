@@ -194,4 +194,4 @@ variables:
   fileNameCheckmarxSpvUi: "Marketplace-SPV-UI-Report.pdf"
   # Wiki Checkmarx
   wikiNameCheckmarx: "Checkmarx Scanning"
-  wikiNameSectionRef: "Down Steam App Template"
+  wikiNameSectionRef: "Down Steam App Template Test"
